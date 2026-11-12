@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { HashRouter, NavLink, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
-import { Bell, CalendarDays, ChevronRight, Heart, LayoutDashboard, LogOut, Menu, Moon, PanelLeftClose, PanelLeftOpen, Search, Settings, Sparkles, Stethoscope, SunMedium, UserCircle2, X, type LucideIcon } from 'lucide-react';
+import { Bell, CalendarDays, ChevronRight, Heart, LayoutDashboard, LogOut, Menu, Moon, Search, Settings, Sparkles, Stethoscope, SunMedium, UserCircle2, X, type LucideIcon } from 'lucide-react';
 import { toast, Toaster } from 'sonner';
 import { AppProvider, useAppContext } from './contexts/AppContext';
 import { AuthPage } from './modules/auth/AuthPage';
@@ -157,7 +157,7 @@ function AppShell() {
               {mobileNavOpen ? <X size={19} /> : <Menu size={19} />}
             </button>
             <button type="button" onClick={() => setSidebarCollapsed((collapsed) => !collapsed)} className="hidden h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800 lg:inline-flex" aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'} aria-expanded={!sidebarCollapsed}>
-              {sidebarCollapsed ? <PanelLeftOpen size={17} /> : <PanelLeftClose size={17} />}
+              <Menu size={19} />
             </button>
           </div>
 
