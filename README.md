@@ -1,59 +1,82 @@
-# Life Organizer
+# ✨ Life Organizer
 
-A responsive personal dashboard for events, memories, medicine routines, search, calendar, favorites, settings, and profile.
+> **Your personal space for the moments, routines, and plans that matter.**
 
-## Run locally
+[🚀 Open the live app](https://onedevshahan.github.io/life-organizer/) · [🛠️ Setup](#-get-started) · [🔥 Firebase](#-firebase-and-sync) · [🧪 Tests](#-quality-checks)
+
+![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-live-6d4aff?logo=github)
+![React](https://img.shields.io/badge/React-19-149eca?logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript)
+
+## 🧭 Explore
+
+| ✨ Module | What you can do |
+| --- | --- |
+| 🏠 Dashboard | Review upcoming moments, daily reminders, and at-a-glance stats |
+| 📖 Events & Memories | Capture dated moments; favorite or remove entries |
+| 💊 Medicine Library | Track dosage, dates, frequency, and a daily reminder time |
+| 🔎 Search | Find events and medicines from the header |
+| 🗓️ Calendar | Explore events by month |
+| 💜 Favorites | Keep important events and medicines close |
+| ⚙️ Settings | Choose a theme, export a backup, or restore your data |
+| 👤 Profile | View your account details |
+
+**Quick controls:** Collapse the desktop sidebar with its panel button; on mobile, use **☰** to show or hide navigation. Choose **Light**, **Dark**, or **System**. The bell opens your upcoming-items panel.
+
+## 🚀 Get started
 
 ```bash
 npm ci
 npm run dev
 ```
 
-Open the URL Vite prints (usually `http://localhost:5173`).
+Open the local URL Vite prints (usually `http://localhost:5173`).
 
-## Modules
+## 🔥 Firebase and sync
 
-| Module | What it does |
-| --- | --- |
-| Dashboard | At-a-glance stats, upcoming events, and medicine reminders |
-| Events & Memories | Add, favorite, and remove dated moments |
-| Medicine Library | Track medicine details and reminder times |
-| Search | Search event and medicine details from the header |
-| Calendar | View events by month |
-| Favorites | Review pinned events and medicines |
-| Settings / Profile | Change synced theme and view your signed-in account |
+Email/password and Google sign-in use Firebase Authentication. User records sync across devices through Firestore under `users/{uid}`. Firestore rules restrict access to the signed-in user’s own data.
 
-Modules are listed in [`src/data/modules.ts`](./src/data/modules.ts); add a registry entry, route, and feature module to extend the app.
+1. In Firebase Console, enable **Authentication → Sign-in method → Email/Password** and **Google**. Set a support email for Google.
+2. Create the Firestore database if needed.
+3. Publish [`firestore.rules`](./firestore.rules) in Firestore → **Rules**, or run:
+   ```bash
+   firebase login
+   firebase deploy --only firestore:rules --project life-organizer-dea64
+   ```
+4. Add `localhost` and `onedevshahan.github.io` under Authentication → **Settings → Authorized domains**.
 
-The navigation can be collapsed on desktop and toggled on mobile. The header's upcoming-items panel summarizes events and medicine reminders; theme preference follows the system setting or can be explicitly switched.
+The supplied Firebase web configuration is included for the static deployment. It is **public client configuration, not a private key**. Restrict its API key to the Firebase APIs and websites you use. Never put service-account keys, passwords, or other server secrets in frontend code. Avoid storing sensitive or regulated health information in this app.
 
-## Firebase setup
+If Google sign-in finds an existing email/password account, the app verifies the existing password and links Google to that Firebase account. The same UID and Firestore data are preserved; identities are not merged without proving control of the existing account.
 
-The app uses Firebase **email/password and Google authentication** with user-scoped Firestore collections. Each signed-in account reads and writes only under `users/{uid}`; Firestore snapshots sync changes between signed-in devices. Sample browser data is not migrated or uploaded.
+## 🔔 Reminders
 
-1. In Firebase Console, enable **Authentication → Sign-in method → Email/Password** and **Google**. For Google, choose a support email and save.
-2. The supplied Firebase web config is the app default. To override it locally, copy `.env.example` to `.env.local` and fill in the six `VITE_FIREBASE_*` values.
-3. Publish [`firestore.rules`](./firestore.rules) in Firestore → Rules, or run `firebase login` and `firebase deploy --only firestore:rules --project life-organizer-dea64` with Firebase CLI.
-4. Create the Firestore database if you haven't already, then add `localhost` and `onedevshahan.github.io` to Authentication → Settings → Authorized domains.
+- Optional browser notifications need permission and work **only while the app is open**; browser throttling may delay them.
+- Events alert at their saved date/time. Medicines alert **once daily** at the saved reminder time between their start and end dates. The free-text frequency does not change alert timing.
+- Notifications are not a substitute for medical advice and must not be used for urgent or safety-critical medication decisions.
 
-If Google returns an email already used by an email/password account, the app asks for that account's password and links Google to the existing Firebase user. This preserves its UID and Firestore data; Firebase cannot safely merge identities without verifying both sign-in methods.
+## 📦 Back up your data
 
-The Firebase web config is public client configuration, not a server secret. Restrict its API key to the required Firebase APIs and expected websites in Google Cloud Console. Firestore rules enforce account ownership. Do not put service-account keys in the frontend or store sensitive/regulated medical data without reviewing applicable requirements.
+In **Settings → Your data**, export a versioned JSON backup or restore one. Import adds records and updates matching IDs; it **does not delete** records missing from the backup. Backups contain personal and medicine information—keep them private and secure.
 
-## Deploy to GitHub Pages
+## ♿ Accessibility
 
-Deployment is configured by [`.github/workflows/static.yml`](./.github/workflows/static.yml).
+The app includes a skip-to-content link, visible keyboard focus, labeled navigation and controls, Escape-key panel dismissal, and validation messages linked to their form fields.
 
-1. In **Settings → Pages**, select **GitHub Actions** as the build and deployment source.
-2. Push to `master` (or run **Deploy to GitHub Pages** from the Actions tab). The supplied Firebase config is built in; repository variables are only needed if you want to override it.
-3. Open the Pages URL shown in the successful workflow deployment.
-
-The workflow builds with the repository's Pages base path. App routes use hash URLs, so refreshing a nested route works on static hosting. The bundled Firebase config initializes the app; Authentication and Firestore still require the Firebase Console setup above.
-
-## Commands
+## 🧪 Quality checks
 
 ```bash
-npm run dev      # local development
-npm run build    # type-check and production build
-npm run preview  # preview the production build locally
+npm test       # unit and UI tests
+npm run build  # strict TypeScript check and production build
+npm run preview
 ```
+
+## 🌐 Deploy
+
+GitHub Pages deployment is handled by [`.github/workflows/static.yml`](./.github/workflows/static.yml).
+
+1. In repository **Settings → Pages**, choose **GitHub Actions** as the source.
+2. Push to `master` or run **Deploy to GitHub Pages** from Actions.
+3. Open the Pages URL after the workflow succeeds.
+
+The build configures the repository base path, and hash-based routes support page refreshes on static hosting.

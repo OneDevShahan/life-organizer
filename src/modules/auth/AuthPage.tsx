@@ -120,11 +120,12 @@ export function AuthPage() {
                     autoComplete="current-password"
                     value={linkPassword}
                     onChange={(event) => setLinkPassword(event.target.value)}
+                    aria-describedby={authError ? 'google-link-error' : undefined}
                     className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 outline-none focus:border-violet-400 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   />
                 </label>
                 {authError && (
-                  <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200" role="alert">
+                  <p id="google-link-error" className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200" role="alert">
                     {authError}
                   </p>
                 )}
@@ -140,8 +141,8 @@ export function AuthPage() {
             {mode === 'sign-up' && (
               <label className="block space-y-1.5">
                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Name</span>
-                <input autoComplete="name" {...register('name')} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 outline-none focus:border-violet-400 dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
-                {errors.name && <span className="text-xs text-rose-500">{errors.name.message}</span>}
+                <input autoComplete="name" {...register('name')} aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? 'auth-name-error' : undefined} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 outline-none focus:border-violet-400 dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+                {errors.name && <span id="auth-name-error" role="alert" className="text-xs text-rose-500">{errors.name.message}</span>}
               </label>
             )}
 
@@ -149,22 +150,22 @@ export function AuthPage() {
               <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Email</span>
               <span className="relative block">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={17} />
-                <input type="email" autoComplete="email" {...register('email')} className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-3 outline-none focus:border-violet-400 dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+                <input type="email" autoComplete="email" {...register('email')} aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? 'auth-email-error' : undefined} className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-3 outline-none focus:border-violet-400 dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
               </span>
-              {errors.email && <span className="text-xs text-rose-500">{errors.email.message}</span>}
+              {errors.email && <span id="auth-email-error" role="alert" className="text-xs text-rose-500">{errors.email.message}</span>}
             </label>
 
             <label className="block space-y-1.5">
               <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Password</span>
               <span className="relative block">
                 <LockKeyhole className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={17} />
-                <input type="password" autoComplete={mode === 'sign-in' ? 'current-password' : 'new-password'} {...register('password')} className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-3 outline-none focus:border-violet-400 dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+                <input type="password" autoComplete={mode === 'sign-in' ? 'current-password' : 'new-password'} {...register('password')} aria-invalid={Boolean(errors.password)} aria-describedby={errors.password ? 'auth-password-error' : undefined} className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-3 outline-none focus:border-violet-400 dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
               </span>
-              {errors.password && <span className="text-xs text-rose-500">{errors.password.message}</span>}
+              {errors.password && <span id="auth-password-error" role="alert" className="text-xs text-rose-500">{errors.password.message}</span>}
             </label>
 
             {authError && (
-              <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200" role="alert">
+              <p id="auth-error" className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200" role="alert">
                 {authError}
               </p>
             )}

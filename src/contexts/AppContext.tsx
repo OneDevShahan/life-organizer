@@ -28,6 +28,7 @@ import type {
   UserProfile,
 } from '../types';
 import { firebaseAuth, firebaseReady } from '../services/firebase';
+import { readThemePreference, resolveTheme, saveThemePreference } from '../services/theme';
 import {
   removeEvent,
   removeFavorite,
@@ -36,11 +37,13 @@ import {
   saveFavorite,
   saveMedicine,
   saveTheme,
+  restoreUserData,
   subscribeEvents,
   subscribeFavorites,
   subscribeMedicines,
   subscribeTheme,
 } from '../services/userData';
+import type { UserDataBackup } from '../services/backup';
 
 type AuthStatus = 'loading' | 'signed-in' | 'signed-out' | 'unconfigured';
 
@@ -50,6 +53,7 @@ interface AppContextValue {
   authError: string | null;
   dataLoading: boolean;
   theme: ThemeMode;
+  restoreBackup: (backup: UserDataBackup) => Promise<boolean>;
   searchTerm: string;
   favorites: FavoriteEntry[];
   events: EventItem[];
@@ -126,12 +130,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [googleLinkEmail, setGoogleLinkEmail] = useState<string | null>(null);
   const [pendingGoogleCredential, setPendingGoogleCredential] = useState<ReturnType<typeof GoogleAuthProvider.credentialFromResult> | null>(null);
   const [dataLoading, setDataLoading] = useState(false);
-  const [theme, setThemeState] = useState<ThemeMode>(() => {
-    const storedTheme = window.localStorage.getItem('life-organizer-theme');
-    return storedTheme === 'light' || storedTheme === 'dark' || storedTheme === 'system'
-      ? storedTheme
-      : 'system';
-  });
+  const [theme, setThemeState] = useState<ThemeMode>(() => readThemePreference(window.localStorage));
   const [searchTerm, setSearchTerm] = useState('');
   const [favorites, setFavorites] = useState<FavoriteEntry[]>([]);
   const [events, setEvents] = useState<EventItem[]>([]);
@@ -161,9 +160,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const root = document.documentElement;
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const applyTheme = () => {
-      const resolvedTheme = theme === 'system' ? (mediaQuery.matches ? 'dark' : 'light') : theme;
-      root.classList.toggle('dark', resolvedTheme === 'dark');
-      root.style.colorScheme = resolvedTheme;
+      const activeTheme = resolveTheme(theme, mediaQuery.matches);
+      root.classList.toggle('dark', activeTheme === 'dark');
+      root.style.colorScheme = activeTheme;
     };
 
     applyTheme();
@@ -172,7 +171,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [theme]);
 
   useEffect(() => {
-    window.localStorage.setItem('life-organizer-theme', theme);
+    saveThemePreference(window.localStorage, theme);
   }, [theme]);
 
   useEffect(() => {
@@ -342,6 +341,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [firebaseUser]);
 
+  const restoreBackup = useCallback(
+    (backup: UserDataBackup) => runDataAction((uid) => restoreUserData(uid, backup)),
+    [runDataAction],
+  );
+
   const value = useMemo<AppContextValue>(() => ({
     user: firebaseUser ? getProfile(firebaseUser) : null,
     authStatus,
@@ -349,6 +353,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     googleLinkEmail,
     dataLoading,
     theme,
+    restoreBackup,
     searchTerm,
     favorites,
     events,
@@ -413,6 +418,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     signOut,
     signUp,
     theme,
+    restoreBackup,
   ]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
