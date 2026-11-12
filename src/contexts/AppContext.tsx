@@ -9,12 +9,16 @@ import {
 } from 'react';
 import {
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  linkWithCredential,
   onAuthStateChanged,
   signInWithEmailAndPassword,
+  signInWithPopup,
   signOut as firebaseSignOut,
   updateProfile,
   type User,
 } from 'firebase/auth';
+import { FirebaseError } from 'firebase/app';
 import { toast } from 'sonner';
 import type {
   EventItem,
@@ -53,6 +57,10 @@ interface AppContextValue {
   setTheme: (mode: ThemeMode) => void;
   setSearchTerm: (term: string) => void;
   signIn: (email: string, password: string) => Promise<boolean>;
+  signInWithGoogle: () => Promise<boolean>;
+  googleLinkEmail: string | null;
+  completeGoogleLink: (password: string) => Promise<boolean>;
+  cancelGoogleLink: () => void;
   signUp: (name: string, email: string, password: string) => Promise<boolean>;
   signOut: () => Promise<boolean>;
   addEvent: (event: EventItem) => Promise<boolean>;
@@ -97,6 +105,8 @@ function getErrorMessage(error: unknown) {
       return 'The email or password is incorrect.';
     case 'auth/email-already-in-use':
       return 'An account already exists for this email.';
+    case 'auth/account-exists-with-different-credential':
+      return 'An account already exists for this email with a different sign-in method. Sign in with that method first.';
     case 'auth/weak-password':
       return 'Use a password with at least 6 characters.';
     case 'auth/too-many-requests':
@@ -113,6 +123,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
   const [authStatus, setAuthStatus] = useState<AuthStatus>(firebaseReady ? 'loading' : 'unconfigured');
   const [authError, setAuthError] = useState<string | null>(null);
+  const [googleLinkEmail, setGoogleLinkEmail] = useState<string | null>(null);
+  const [pendingGoogleCredential, setPendingGoogleCredential] = useState<ReturnType<typeof GoogleAuthProvider.credentialFromResult> | null>(null);
   const [dataLoading, setDataLoading] = useState(false);
   const [theme, setThemeState] = useState<ThemeMode>('system');
   const [searchTerm, setSearchTerm] = useState('');
@@ -227,6 +239,64 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return runAuthAction(() => signInWithEmailAndPassword(auth, email, password));
   }, [runAuthAction]);
 
+  const signInWithGoogle = useCallback(() => {
+    const auth = firebaseAuth;
+    if (!auth) {
+      setAuthError('Firebase is not configured. Add the Firebase web app settings first.');
+      return Promise.resolve(false);
+    }
+
+    setAuthError(null);
+    return signInWithPopup(auth, new GoogleAuthProvider())
+      .then(() => true)
+      .catch((error: unknown) => {
+        const code = typeof error === 'object' && error && 'code' in error
+          ? String(error.code)
+          : '';
+        const credential = error instanceof FirebaseError
+          ? GoogleAuthProvider.credentialFromError(error)
+          : null;
+        const email = typeof error === 'object' && error && 'customData' in error &&
+          typeof error.customData === 'object' && error.customData && 'email' in error.customData
+          ? String(error.customData.email)
+          : '';
+
+        if (code === 'auth/account-exists-with-different-credential' && credential && email) {
+          setPendingGoogleCredential(credential);
+          setGoogleLinkEmail(email);
+          return false;
+        }
+
+        const message = getErrorMessage(error);
+        setAuthError(message);
+        toast.error(message);
+        return false;
+      });
+  }, []);
+
+  const completeGoogleLink = useCallback((password: string) => {
+    const auth = firebaseAuth;
+    const email = googleLinkEmail;
+    const credential = pendingGoogleCredential;
+    if (!auth || !email || !credential) {
+      setAuthError('Start Google sign-in again to connect your account.');
+      return Promise.resolve(false);
+    }
+
+    return runAuthAction(async () => {
+      const existingAccount = await signInWithEmailAndPassword(auth, email, password);
+      await linkWithCredential(existingAccount.user, credential);
+      setPendingGoogleCredential(null);
+      setGoogleLinkEmail(null);
+    });
+  }, [googleLinkEmail, pendingGoogleCredential, runAuthAction]);
+
+  const cancelGoogleLink = useCallback(() => {
+    setPendingGoogleCredential(null);
+    setGoogleLinkEmail(null);
+    setAuthError(null);
+  }, []);
+
   const signUp = useCallback((name: string, email: string, password: string) => {
     const auth = firebaseAuth;
     if (!auth) {
@@ -268,6 +338,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     user: firebaseUser ? getProfile(firebaseUser) : null,
     authStatus,
     authError,
+    googleLinkEmail,
     dataLoading,
     theme,
     searchTerm,
@@ -282,6 +353,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     setSearchTerm,
     signIn,
+    signInWithGoogle,
+    completeGoogleLink,
+    cancelGoogleLink,
     signUp,
     signOut,
     addEvent: (event) => runDataAction((uid) => saveEvent(uid, event)),
@@ -315,6 +389,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }), [
     authStatus,
     authError,
+    googleLinkEmail,
     dataLoading,
     events,
     favorites,
@@ -324,6 +399,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     searchTerm,
     setSearchTerm,
     signIn,
+    signInWithGoogle,
+    completeGoogleLink,
+    cancelGoogleLink,
     signOut,
     signUp,
     theme,

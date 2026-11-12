@@ -27,12 +27,14 @@ Modules are listed in [`src/data/modules.ts`](./src/data/modules.ts); add a regi
 
 ## Firebase setup
 
-The app uses Firebase **email/password authentication** and user-scoped Firestore collections. Each signed-in account reads and writes only under `users/{uid}`; Firestore snapshots sync changes between signed-in devices. Sample browser data is not migrated or uploaded.
+The app uses Firebase **email/password and Google authentication** with user-scoped Firestore collections. Each signed-in account reads and writes only under `users/{uid}`; Firestore snapshots sync changes between signed-in devices. Sample browser data is not migrated or uploaded.
 
-1. In Firebase Console, enable **Authentication → Email/Password** and create the Firestore database.
+1. In Firebase Console, enable **Authentication → Sign-in method → Email/Password** and **Google**. For Google, choose a support email and save.
 2. The supplied Firebase web config is the app default. To override it locally, copy `.env.example` to `.env.local` and fill in the six `VITE_FIREBASE_*` values.
 3. Publish [`firestore.rules`](./firestore.rules) in Firestore → Rules, or run `firebase login` and `firebase deploy --only firestore:rules --project life-organizer-dea64` with Firebase CLI.
-4. Add `localhost` and your GitHub Pages hostname to Authentication → Settings → Authorized domains.
+4. Create the Firestore database if you haven't already, then add `localhost` and `onedevshahan.github.io` to Authentication → Settings → Authorized domains.
+
+If Google returns an email already used by an email/password account, the app asks for that account's password and links Google to the existing Firebase user. This preserves its UID and Firestore data; Firebase cannot safely merge identities without verifying both sign-in methods.
 
 The Firebase web config is public client configuration, not a server secret. Restrict its API key to the required Firebase APIs and expected websites in Google Cloud Console. Firestore rules enforce account ownership. Do not put service-account keys in the frontend or store sensitive/regulated medical data without reviewing applicable requirements.
 
