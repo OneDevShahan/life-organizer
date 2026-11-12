@@ -30,22 +30,21 @@ Modules are listed in [`src/data/modules.ts`](./src/data/modules.ts); add a regi
 The app uses Firebase **email/password authentication** and user-scoped Firestore collections. Each signed-in account reads and writes only under `users/{uid}`; Firestore snapshots sync changes between signed-in devices. Sample browser data is not migrated or uploaded.
 
 1. In Firebase Console, enable **Authentication → Email/Password** and create the Firestore database.
-2. Set the six `VITE_FIREBASE_*` values from the Firebase web app config in `.env.local` (start from `.env.example`).
+2. The supplied Firebase web config is the app default. To override it locally, copy `.env.example` to `.env.local` and fill in the six `VITE_FIREBASE_*` values.
 3. Publish [`firestore.rules`](./firestore.rules) in Firestore → Rules, or run `firebase login` and `firebase deploy --only firestore:rules --project life-organizer-dea64` with Firebase CLI.
 4. Add `localhost` and your GitHub Pages hostname to Authentication → Settings → Authorized domains.
 
-The Firebase web config is public client configuration, not a server secret. Firestore rules enforce account ownership. Do not put service-account keys in the frontend or store sensitive/regulated medical data without reviewing applicable requirements.
+The Firebase web config is public client configuration, not a server secret. Restrict its API key to the required Firebase APIs and expected websites in Google Cloud Console. Firestore rules enforce account ownership. Do not put service-account keys in the frontend or store sensitive/regulated medical data without reviewing applicable requirements.
 
 ## Deploy to GitHub Pages
 
 Deployment is configured by [`.github/workflows/static.yml`](./.github/workflows/static.yml).
 
 1. In **Settings → Pages**, select **GitHub Actions** as the build and deployment source.
-2. In **Settings → Secrets and variables → Actions → Variables**, add the six `VITE_FIREBASE_*` values from your web config. They are public client settings, so repository variables are appropriate.
-3. Push to `master` (or run **Deploy to GitHub Pages** from the Actions tab).
-4. Open the Pages URL shown in the successful workflow deployment.
+2. Push to `master` (or run **Deploy to GitHub Pages** from the Actions tab). The supplied Firebase config is built in; repository variables are only needed if you want to override it.
+3. Open the Pages URL shown in the successful workflow deployment.
 
-The workflow builds with the repository's Pages base path. App routes use hash URLs, so refreshing a nested route works on static hosting. Auth and cloud sync stay disabled in the deployed app until the Actions variables are configured.
+The workflow builds with the repository's Pages base path. App routes use hash URLs, so refreshing a nested route works on static hosting. The bundled Firebase config initializes the app; Authentication and Firestore still require the Firebase Console setup above.
 
 ## Commands
 
