@@ -13,9 +13,11 @@ export function EventsPage() {
     defaultValues: { title: '', date: '', time: '09:00', category: 'event', location: '', notes: '', mood: '' },
   });
 
-  const onSubmit = (values: EventFormValues) => {
-    addEvent({ id: crypto.randomUUID(), ...values, favorite: false });
-    reset();
+  const onSubmit = async (values: EventFormValues) => {
+    const saved = await addEvent({ id: crypto.randomUUID(), ...values });
+    if (saved) {
+      reset();
+    }
   };
 
   return (

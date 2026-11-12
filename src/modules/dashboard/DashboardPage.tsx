@@ -5,11 +5,14 @@ import { useAppContext } from '../../contexts/AppContext';
 
 export function DashboardPage() {
   const { user, events, medicines, favorites } = useAppContext();
+  if (!user) {
+    return null;
+  }
   const stats = [
     { label: 'Events', value: String(events.length), icon: CalendarRange, tone: 'violet' },
     { label: 'Medicines', value: String(medicines.length), icon: Pill, tone: 'emerald' },
     { label: 'Favorites', value: String(favorites.length), icon: Heart, tone: 'rose' },
-    { label: 'Wellbeing', value: '92%', icon: Activity, tone: 'sky' },
+    { label: 'Cloud sync', value: 'Live', icon: Activity, tone: 'sky' },
   ];
 
   return (

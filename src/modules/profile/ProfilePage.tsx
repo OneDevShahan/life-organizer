@@ -1,8 +1,12 @@
-﻿import { LogIn, LogOut, ShieldCheck, UserCircle2 } from 'lucide-react';
+import { ShieldCheck, UserCircle2 } from 'lucide-react';
 import { useAppContext } from '../../contexts/AppContext';
 
 export function ProfilePage() {
-  const { user, signIn, signOut } = useAppContext();
+  const { user } = useAppContext();
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <div className="space-y-6">
@@ -19,7 +23,6 @@ export function ProfilePage() {
             <p className="text-sm text-slate-500 dark:text-slate-400">{user.email}</p>
             <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-slate-700 dark:bg-slate-800 dark:text-slate-200"><ShieldCheck size={14} /> {user.role}</div>
           </div>
-          <button type="button" onClick={user.email.includes('guest') ? signIn : signOut} className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white hover:bg-slate-700 dark:bg-violet-600 dark:hover:bg-violet-500">{user.email.includes('guest') ? <LogIn size={16} /> : <LogOut size={16} />} {user.email.includes('guest') ? 'Sign in' : 'Sign out'}</button>
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -29,7 +32,7 @@ export function ProfilePage() {
           </div>
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/80">
             <div className="flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400"><ShieldCheck size={16} /> Security status</div>
-            <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">Firebase-ready configuration is in place, and the app is prepared for secure authentication, Firestore storage, and app checks.</p>
+            <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">You are signed in with Firebase Authentication. Firestore access is isolated by user ID; publish the repository security rules before using real personal data.</p>
           </div>
         </div>
       </div>

@@ -32,7 +32,6 @@ export interface EventItem {
   location: string;
   notes: string;
   mood: string;
-  favorite?: boolean;
 }
 
 export interface MedicineItem {
@@ -45,7 +44,6 @@ export interface MedicineItem {
   endDate: string;
   notes: string;
   category: MedicineCategory;
-  favorite?: boolean;
 }
 
 export interface FavoriteEntry {
@@ -59,13 +57,4 @@ export interface ModuleDefinition {
   path: string;
   description: string;
   icon: string;
-}
-
-export interface AppState {
-  user: UserProfile;
-  theme: ThemeMode;
-  searchTerm: string;
-  favorites: FavoriteEntry[];
-  events: EventItem[];
-  medicines: MedicineItem[];
 }

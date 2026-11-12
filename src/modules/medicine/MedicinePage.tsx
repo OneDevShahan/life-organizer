@@ -12,9 +12,11 @@ export function MedicinePage() {
     defaultValues: { name: '', dosage: '', frequency: 'Daily', reminderTime: '08:00', startDate: '', endDate: '', notes: '', category: 'supplement' },
   });
 
-  const onSubmit = (values: MedicineFormValues) => {
-    addMedicine({ id: crypto.randomUUID(), ...values, favorite: false });
-    reset();
+  const onSubmit = async (values: MedicineFormValues) => {
+    const saved = await addMedicine({ id: crypto.randomUUID(), ...values });
+    if (saved) {
+      reset();
+    }
   };
 
   return (

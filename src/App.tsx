@@ -1,6 +1,8 @@
 import { HashRouter, NavLink, Navigate, Route, Routes } from 'react-router-dom';
-import { Bell, CalendarDays, ChevronRight, Heart, LayoutDashboard, LogIn, LogOut, Moon, Search, Settings, Sparkles, Stethoscope, SunMedium, UserCircle2, type LucideIcon } from 'lucide-react';
+import { Bell, CalendarDays, ChevronRight, Heart, LayoutDashboard, LogOut, Moon, Search, Settings, Sparkles, Stethoscope, SunMedium, UserCircle2, type LucideIcon } from 'lucide-react';
+import { Toaster } from 'sonner';
 import { AppProvider, useAppContext } from './contexts/AppContext';
+import { AuthPage } from './modules/auth/AuthPage';
 import { moduleRegistry } from './data/modules';
 import { DashboardPage } from './modules/dashboard/DashboardPage';
 import { EventsPage } from './modules/events/EventsPage';
@@ -23,8 +25,11 @@ const moduleIcons: Record<string, LucideIcon> = {
 };
 
 function AppShell() {
-  const { user, searchTerm, setSearchTerm, theme, setTheme, signIn, signOut } = useAppContext();
-  const isGuest = user.email.includes('guest');
+  const { user, authStatus, dataLoading, searchTerm, setSearchTerm, theme, setTheme, signOut } = useAppContext();
+
+  if (authStatus === 'unconfigured' || authStatus === 'loading' || !user) {
+    return <AuthPage />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100">
@@ -85,15 +90,20 @@ function AppShell() {
                   {theme === 'dark' ? <SunMedium size={16} /> : <Moon size={16} />}
                   {theme === 'dark' ? 'Light' : 'Dark'}
                 </button>
-                <button type="button" onClick={isGuest ? signIn : signOut} className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-700 dark:bg-violet-600 dark:hover:bg-violet-500">
-                  {isGuest ? <LogIn size={16} /> : <LogOut size={16} />}
-                  {isGuest ? 'Sign in' : 'Sign out'}
+                <button type="button" onClick={() => void signOut()} className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-700 dark:bg-violet-600 dark:hover:bg-violet-500">
+                  <LogOut size={16} />
+                  Sign out
                 </button>
               </div>
             </div>
           </header>
 
           <main className="p-4 sm:p-6 lg:p-8">
+            {dataLoading && (
+              <div className="mb-5 rounded-xl bg-violet-50 px-4 py-3 text-sm text-violet-700 dark:bg-violet-500/10 dark:text-violet-200" role="status">
+                Syncing your data…
+              </div>
+            )}
             <Routes>
               <Route path="/" element={<DashboardPage />} />
               <Route path="/events" element={<EventsPage />} />
@@ -117,6 +127,7 @@ export default function App() {
     <HashRouter>
       <AppProvider>
         <AppShell />
+        <Toaster position="top-right" richColors />
       </AppProvider>
     </HashRouter>
   );
