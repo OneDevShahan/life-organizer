@@ -34,9 +34,8 @@ The current app is a **client-side demo**: its sample data and edits are stored 
 Deployment is configured by [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml).
 
 1. Push the repository to GitHub.
-2. In **Settings → Pages**, set the build and deployment source to **GitHub Actions**.
-3. Push to `main` or `master` (or run **Deploy to GitHub Pages** from the Actions tab).
-4. Open the Pages URL shown in the workflow deployment.
+2. Push to `main` or `master` (or run **Deploy to GitHub Pages** from the Actions tab). The workflow enables Pages and builds the site.
+3. Open the Pages URL shown in the workflow deployment.
 
 The workflow builds with the repository's Pages base path. App routes use hash URLs, so refreshing a nested route works on static hosting.
 
