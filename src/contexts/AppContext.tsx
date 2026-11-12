@@ -126,7 +126,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [googleLinkEmail, setGoogleLinkEmail] = useState<string | null>(null);
   const [pendingGoogleCredential, setPendingGoogleCredential] = useState<ReturnType<typeof GoogleAuthProvider.credentialFromResult> | null>(null);
   const [dataLoading, setDataLoading] = useState(false);
-  const [theme, setThemeState] = useState<ThemeMode>('system');
+  const [theme, setThemeState] = useState<ThemeMode>(() => {
+    const storedTheme = window.localStorage.getItem('life-organizer-theme');
+    return storedTheme === 'light' || storedTheme === 'dark' || storedTheme === 'system'
+      ? storedTheme
+      : 'system';
+  });
   const [searchTerm, setSearchTerm] = useState('');
   const [favorites, setFavorites] = useState<FavoriteEntry[]>([]);
   const [events, setEvents] = useState<EventItem[]>([]);
@@ -167,11 +172,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [theme]);
 
   useEffect(() => {
+    window.localStorage.setItem('life-organizer-theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
     if (!firebaseUser) {
       setEvents([]);
       setMedicines([]);
       setFavorites([]);
-      setThemeState('system');
       setDataLoading(false);
       return;
     }

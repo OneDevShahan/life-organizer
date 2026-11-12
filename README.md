@@ -25,6 +25,8 @@ Open the URL Vite prints (usually `http://localhost:5173`).
 
 Modules are listed in [`src/data/modules.ts`](./src/data/modules.ts); add a registry entry, route, and feature module to extend the app.
 
+The navigation can be collapsed on desktop and toggled on mobile. The header's upcoming-items panel summarizes events and medicine reminders; theme preference follows the system setting or can be explicitly switched.
+
 ## Firebase setup
 
 The app uses Firebase **email/password and Google authentication** with user-scoped Firestore collections. Each signed-in account reads and writes only under `users/{uid}`; Firestore snapshots sync changes between signed-in devices. Sample browser data is not migrated or uploaded.
